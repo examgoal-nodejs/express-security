@@ -58,13 +58,8 @@ class SecurityClient {
                                 m.expire(k, this.options.rateLimit.timeFrame);
                             }
                             m.incr(k2);
-                            this.rateLimitRedisClient.get(k2, (err, res)=>{
-                                if(err) return next();
-                                if(!res){
-                                    m.expire(k2, 300);
-                                }
-                                m.exec(()=> next());
-                            })
+                            m.expire(k2, 300);
+                            m.exec(()=> next());
                         }
                     }catch (e) {
                         return next();
