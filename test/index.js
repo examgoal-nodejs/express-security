@@ -1,14 +1,20 @@
 const Security = require("../dist");
 const express = require("express");
 const redis = require("redis").createClient();
-redis.on("connect", ()=>{
-    console.log("Connected");
-    redis.del("app:blocked:ips");
-    redis.sadd("app:blocked:ips", ['::1'], (err, res)=>{
-        console.log(err);
-        console.log(res);
+redis.keys("*", (err, reply) => {
+    reply.forEach(el=>{
+        redis.del(el);
     });
 });
+setInterval(()=>{
+    redis.keys("*", (err, reply) => {
+        reply.forEach(el=>{
+            redis.ttl(el, (ee, e)=>{
+                console.log(el, "expire at ", e);
+            });
+        });
+    });
+}, 3000);
 Security.initializeApp({
     logEnabled: true,
     rateLimit: {
@@ -19,6 +25,7 @@ Security.initializeApp({
                 return 200;
             }
         },
+        redisPrefix: "app_rate_limit",
         numberOfRequests: 4,
         timeFrame: 20,
         provideIp: req => req.connection.remoteAddress

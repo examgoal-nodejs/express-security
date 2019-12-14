@@ -11,6 +11,7 @@ export interface AppOptions {
 export interface BlockIpOptions {
     redis: ClientOpts,
     redisKey: string,
+    timeFrame?: number
     provideIp: (req: Request) => string,
     customHandler?: (req: Request, res: Response, next: NextFunction) => any
 }
