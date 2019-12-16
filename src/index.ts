@@ -91,24 +91,19 @@ class SecurityClient {
     checkIfIpBlocked(ip: string, req: Request, res: Response, next: NextFunction){
         if(!this.options.blockIp) return next();
         const ipAddresses = this.blockedIpMap.ips;
-        const l = ipAddresses.length;
-        let block = false;
-        for (let i = 0; i < l; i++){
-            if(ipRangeCheck(ip, ipAddresses[i])){
-                this.log(`Blocking Ip ${ip}`);
-                block = true;
-                break;
-            }
-        }
-        if(block){
-            if(this.options.blockIp.customHandler){
+        Promise.all(ipAddresses.map(el=>{
+            return new Promise((resolve, reject)=>{
+                if(ipRangeCheck(ip, el)) return reject(`${ip} IP is Blocked`);
+                return resolve(el);
+            })
+        })).then(res => next())
+            .catch(err=>{
+            if(this.options.blockIp && this.options.blockIp.customHandler){
                 return this.options.blockIp.customHandler(req, res, next);
             }else {
                 return res.status(401).send("Client is not authorized");
             }
-        }else {
-            return next();
-        }
+        });
     }
 
     log(message: any){

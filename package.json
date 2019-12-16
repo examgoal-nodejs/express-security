@@ -1,6 +1,6 @@
 {
   "name": "@examgoal/security",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "Arpan Roy",
   "license": "MIT",
   "types": "./dist/index.d.ts",
